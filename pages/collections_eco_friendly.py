@@ -13,12 +13,15 @@ class CollectionsEcoFriendly(BasePage):
         super().__init__(driver)
         self.wait = WebDriverWait(self.driver, 5)
 
-    def verify_item_added_to_compare(self):
+    def add_item_to_compare(self):
         first_item = self.find(loc.first_item_loc)
         compare_button = self.find(loc.compare_button_loc)
 
         ActionChains(self.driver).move_to_element(first_item).click(compare_button).perform()
+
+    def verify_item_successfully_added_to_compare(self):
         self.wait.until(EC.visibility_of_element_located(loc.item_in_compare_products_loc))
+
         first_item_name = (self.find(loc.first_item_loc)).text
         assert (self.find(loc.item_in_compare_products_loc)).text == first_item_name
 
@@ -32,10 +35,10 @@ class CollectionsEcoFriendly(BasePage):
         assert project_ec.image_is_loaded(first_product_image)
         assert project_ec.image_is_loaded(fifth_product_image)
 
-    def verify_erin_recommends_options(self):
-        erin_recommends = self.find(loc.erin_recommends_loc)
-        erin_recommends.click()
+    def click_erin_recommends_menu_option(self):
+        self.find(loc.erin_recommends_loc).click()
 
+    def verify_erin_recommends_submenu_options_clickable(self):
         erin_recommends_yes = self.find(loc.erin_recommends_yes_loc)
         erin_recommends_no = self.find(loc.erin_recommends_no_loc)
         assert erin_recommends_yes.is_displayed() and erin_recommends_yes.is_enabled()
