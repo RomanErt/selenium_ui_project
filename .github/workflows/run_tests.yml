@@ -31,13 +31,13 @@ jobs:
         if: "github.event.inputs.deploymment_target == 'all'"
         run: pytest -v --alluredir=allure-results
       - name: Run smoke tests
-        if: "github.event.inputs.deploymment_target == 'smoke'"
+        if: "github.event.inputs.deployment_target == 'smoke'"
         run: pytest -m smoke --alluredir=allure-results
       - name: Run regression tests
-        if: "github.event.inputs.deploymment_target == 'regression'"
+        if: "github.event.inputs.deployment_target == 'regression'"
         run: pytest -m regression --alluredir=allure-results
       - name: Run extended tests
-        if: "github.event.inputs.deploymment_target == 'extended'"
+        if: "github.event.inputs.deployment_target == 'extended'"
         run: pytest -m extended --alluredir=allure-results
       - name: Install Java
         uses: actions/setup-java@v3 
@@ -53,6 +53,6 @@ jobs:
         with: 
           name: allure-report
           path: allure-report
-          retention-days: 360
+          retention-days: 90
         
  
