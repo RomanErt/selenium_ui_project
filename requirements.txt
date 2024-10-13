@@ -1,3 +1,5 @@
+allure-pytest==2.13.5
+allure-python-commons==2.13.5
 attrs==24.2.0
 certifi==2024.8.30
 h11==0.14.0
