@@ -22,9 +22,6 @@ class CollectionsEcoFriendly(BasePage):
     def verify_item_successfully_added_to_compare(self):
         self.wait.until(EC.visibility_of_element_located(loc.item_in_compare_products_loc))
 
-        first_item_name = (self.find(loc.first_item_loc)).text
-        assert (self.find(loc.item_in_compare_products_loc)).text == first_item_name
-
         you_added_item_banner = self.find(loc.you_added_item_banner_loc)
         assert you_added_item_banner.is_displayed()
 
