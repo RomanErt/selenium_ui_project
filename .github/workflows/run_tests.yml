@@ -30,15 +30,19 @@ jobs:
       - name: Run all tests
         if: "github.event.inputs.deploymment_target == 'all'"
         run: pytest -v --alluredir=allure-results
+        continue-on-error: true
       - name: Run smoke tests
         if: "github.event.inputs.deployment_target == 'smoke'"
         run: pytest -m smoke --alluredir=allure-results
+        continue-on-error: true
       - name: Run regression tests
         if: "github.event.inputs.deployment_target == 'regression'"
         run: pytest -m regression --alluredir=allure-results
+        continue-on-error: true
       - name: Run extended tests
         if: "github.event.inputs.deployment_target == 'extended'"
         run: pytest -m extended --alluredir=allure-results
+        continue-on-error: true
       - name: Install Java
         uses: actions/setup-java@v3 
         with:
@@ -47,12 +51,25 @@ jobs:
       - name: Install Allure
         run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz && sudo tar -zxvf allure-2.24.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
       - name: Generate report
-        run: allure generate -c allure-results -o allure-report
+        run: allure generate -c allure-results -o _site
       - name: Save allure report
         uses: actions/upload-artifact@v4
         with: 
-          name: allure-report
-          path: allure-report
+          name: _site
+          path: _site
           retention-days: 90
+          
+  publish-report: 
+    name: Report publication
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+    
         
  
