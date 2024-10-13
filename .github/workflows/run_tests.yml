@@ -18,7 +18,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  
+
 jobs:
   download-history:
     runs-on: ubuntu-latest
@@ -28,29 +28,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: >
-          ARTIFACT_ID=$(curl -L 
-          -H "Accept: application/vnd.github+json" 
-          -H "X-GitHub-Api-Version: 2022-11-28" 
-          "https://api.github.com/repos/romanert/selenium_ui_project/actions/artifacts?name=allure-results" 
-          | python3 -c "import sys, json; print(json.load(sys.stdin)['artifacts'][0]['id']);") 
-          &&
-          curl -L 
-          -H "Accept: application/vnd.github+json" 
-          -H "Authorization: Bearer ${{ secrets.ACTIONS_TOKEN }}" 
-          -H "X-GitHub-Api-Version: 2022-11-28" 
-          https://api.github.com/repos/romanert/selenium_ui_project/actions/artifacts/$ARTIFACT_ID/zip -o artifacts.zip 
-      - run: ls -la
-      - run: du -h artifacts.zip
-      - run: mkdir allure-results && unzip artifacts.zip -d allure-results
-      - name: Store allure history
-        uses: actions/upload-artifact@v4
-        with: 
+      - name: Download Allure results history
+        uses: actions/download-artifact@v4
+        with:
           name: allure-results
-          path: allure-results
-          retention-days: 1
+      - run: mkdir allure-results && unzip artifacts.zip -d allure-results || echo "No previous allure results found."
 
-    
   run-tests:
     runs-on: ubuntu-latest
     needs: download-history
@@ -64,22 +47,20 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v4
       - name: Run all tests
-        if: "github.event.inputs.deploymment_target == 'all'"
+        if: ${{ github.event.inputs.deployment_target == 'all' }}
         run: pytest -v --alluredir=allure-results
         continue-on-error: true
       - name: Run smoke tests
-        if: "github.event.inputs.deployment_target == 'smoke'"
+        if: ${{ github.event.inputs.deployment_target == 'smoke' }}
         run: pytest -m smoke --alluredir=allure-results
         continue-on-error: true
       - name: Run regression tests
-        if: "github.event.inputs.deployment_target == 'regression'"
+        if: ${{ github.event.inputs.deployment_target == 'regression' }}
         run: pytest -m regression --alluredir=allure-results
         continue-on-error: true
       - name: Run extended tests
-        if: "github.event.inputs.deployment_target == 'extended'"
+        if: ${{ github.event.inputs.deployment_target == 'extended' }}
         run: pytest -m extended --alluredir=allure-results
         continue-on-error: true
       - name: Store Allure results
@@ -91,8 +72,8 @@ jobs:
 
   generate-report:
     runs-on: ubuntu-latest
-    name: Generate report
     needs: run-tests
+    name: Generate report
     steps:
       - name: Install Java
         uses: actions/setup-java@v4 
@@ -101,11 +82,13 @@ jobs:
           java-version: '21' 
       - name: Install Allure
         run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz && sudo tar -zxvf allure-2.24.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
-      - name: Download all workflow run artifacts
+      - name: Download Allure results artifacts
         uses: actions/download-artifact@v4
+        with:
+          name: allure-results
       - name: Generate report
         run: allure generate -c allure-results -o _site
-      - name: Store allure report
+      - name: Store Allure report
         uses: actions/upload-artifact@v4
         with: 
           name: _site
@@ -117,11 +100,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-report
     steps: 
-      - name: Download artifacts
+      - name: Download Allure report artifact
         uses: actions/download-artifact@v4
+        with:
+          name: _site
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-    
