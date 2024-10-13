@@ -44,10 +44,10 @@ jobs:
         run: pytest -m extended --alluredir=allure-results
         continue-on-error: true
       - name: Install Java
-        uses: actions/setup-java@v3 
+        uses: actions/setup-java@v4 
         with:
           distribution: 'microsoft' 
-          java-version: '17' 
+          java-version: '21' 
       - name: Install Allure
         run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz && sudo tar -zxvf allure-2.24.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
       - name: Generate report
@@ -66,7 +66,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
